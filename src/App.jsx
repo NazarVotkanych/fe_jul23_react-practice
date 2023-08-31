@@ -18,22 +18,36 @@ function filterCategoriesByid(categoryId) {
   )) || null;
 }
 
-const products = productsFromServer.map(product => ({
-  ...product,
-  category: filterCategoriesByid(product.categoryId), // find by product.categoryId
-  user: findUserById(product.userId), // find by category.ownerId
+// const products = productsFromServer.map(product => ({
+//   ...product,
+//   category: filterCategoriesByid(product.categoryId), // find by product.categoryId
+//   user: findUserById(product.userId), // find by category.ownerId
 
-}));
+// }));
 
 export const App = () => {
   const [selectUser, setSelectUser] = useState(null);
   const [productName, setProductName] = useState('');
 
-  const handleUserFilter = userId => {
+  const filteredProducts =
+    productsFromServer
+      .map(product => {
+        const category = filterCategoriesByid(product.categoryId);
+        const user = findUserById(product.userId);
+
+        return {
+          ...product,
+          category,
+          user,
+        };
+      })
+      .filter(product => selectUser === null || product.user.id === selectUser);
+
+  const handleUserFilter = (userId) => {
     setSelectUser(userId);
   };
 
-  const handleProductName = event => {
+  const handleProductName = (event) => {
     setProductName(event.target.value);
   };
 
@@ -214,7 +228,7 @@ export const App = () => {
             </thead>
 
             <tbody>
-              {products.map(product => (
+              {filteredProducts.map(product => (
                 <tr
                   key={product.id}
                   data-cy="Product"
@@ -240,8 +254,7 @@ export const App = () => {
                     {product.name}
                   </td>
                 </tr>
-              ),
-              )}
+              ))}
 
               {/* <tr data-cy="Product">
               <td className="has-text-weight-bold" data-cy="ProductId">
@@ -279,5 +292,5 @@ export const App = () => {
         </div>
       </div>
     </div>
-  )
+  );
 };
